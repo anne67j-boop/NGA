@@ -12,6 +12,7 @@
     </script>
     <script>
       tailwind.config = {
+        darkMode: 'class', // Enable class-based dark mode
         theme: {
           extend: {
             colors: {
@@ -40,7 +41,8 @@
                 600: '#475569',
                 700: '#334155',
                 800: '#1e293b',
-                900: '#0f172a', 
+                900: '#0f172a',
+                950: '#020617', // Added for dark mode backgrounds
               }
             },
             fontFamily: {
@@ -56,11 +58,20 @@
         }
       }
     </script>
+    <script>
+      // Check local storage or system preference on load
+      if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Merriweather:wght@400;700&display=swap" rel="stylesheet">
     <style>
       /* Smooth scrolling and better font rendering */
       html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
       body { background-color: #f8fafc; color: #1e293b; }
+      .dark body { background-color: #020617; color: #f8fafc; }
       
       /* Animation Utilities */
       .animate-fade-in { animation: fadeIn 0.6s ease-out; }
@@ -95,7 +106,7 @@
 }
 </script>
 </head>
-  <body>
+  <body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-200">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>

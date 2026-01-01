@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, ArrowRight, AlertCircle, Loader2, Key } from 'lucide-react';
+import { ShieldCheck, Loader2 } from 'lucide-react';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -9,23 +9,11 @@ const Login: React.FC = () => {
   const handleLogin = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setIsLoading(true);
-    // Simulate auth delay
+    // Simulate auth delay for production feel
     setTimeout(() => {
       window.location.hash = '#/dashboard';
       setIsLoading(false);
-    }, 1200);
-  };
-
-  const performDemoLogin = () => {
-    setIsLoading(true);
-    setEmail('john.doe@example.com');
-    setPassword('SecurePass123!');
-    
-    // Auto-redirect after a short "filling" delay
-    setTimeout(() => {
-      window.location.hash = '#/dashboard';
-      setIsLoading(false);
-    }, 800);
+    }, 1500);
   };
 
   return (
@@ -119,27 +107,6 @@ const Login: React.FC = () => {
               </button>
             </div>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-slate-500">Demo Access</span>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <button
-                onClick={performDemoLogin}
-                className="flex w-full items-center justify-center rounded-md border border-slate-300 bg-white py-2 px-4 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50 transition-colors"
-              >
-                <Key className="h-4 w-4 mr-2 text-slate-400" />
-                Use Demo Credentials
-              </button>
-            </div>
-          </div>
         </div>
         
         <div className="mt-8 flex justify-center space-x-2 text-slate-400 text-xs">

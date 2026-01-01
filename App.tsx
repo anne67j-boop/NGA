@@ -11,6 +11,7 @@ import Eligibility from './pages/Eligibility';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VisionLab from './pages/VisionLab';
+import VProfile from './pages/VProfile';
 
 const App: React.FC = () => {
   const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
@@ -46,6 +47,7 @@ const App: React.FC = () => {
       case '#/login': return <Login />; 
       case '#/dashboard': return <Dashboard />;
       case '#/visionlab': return <VisionLab />;
+      case '#/vprofile': return <VProfile />;
       default: return <Home />;
     }
   };
