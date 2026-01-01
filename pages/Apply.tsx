@@ -1,24 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { GRANTS } from '../constants';
-import { ShieldCheck, CheckCircle, Lock, AlertCircle, ChevronRight, ChevronLeft, Info, Wand2, RefreshCw, Loader2 } from 'lucide-react';
+import { CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 
 const Apply: React.FC = () => {
   const [preselectedGrantId, setPreselectedGrantId] = useState('');
-
-  useEffect(() => {
-    const hash = window.location.hash;
-    const queryString = hash.split('?')[1];
-    if (queryString) {
-      const params = new URLSearchParams(queryString);
-      const grantId = params.get('preselectedGrant');
-      if (grantId) setPreselectedGrantId(grantId);
-    }
-  }, []);
-
   const [submitted, setSubmitted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isFilling, setIsFilling] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -40,12 +28,24 @@ const Apply: React.FC = () => {
     certification: false
   });
 
+  // Preselect grant from URL
+  useEffect(() => {
+    const hash = window.location.hash;
+    const queryString = hash.split('?')[1];
+    if (queryString) {
+      const params = new URLSearchParams(queryString);
+      const grantId = params.get('preselectedGrant');
+      if (grantId) setPreselectedGrantId(grantId);
+    }
+  }, []);
+
   useEffect(() => {
     if (preselectedGrantId) {
       setFormData(prev => ({ ...prev, grantId: preselectedGrantId }));
     }
   }, [preselectedGrantId]);
 
+  // Demo autofill
   const fillDemoData = () => {
     setIsFilling(true);
     setTimeout(() => {
@@ -55,7 +55,7 @@ const Apply: React.FC = () => {
         dob: "1985-04-12",
         phone: "(555) 019-2834",
         email: "alex.mercer@example.com",
-        address: "123 Freedom Way, Suite 400, Washington, DC 20001",
+        address: "123 Freedom Way, Washington, DC",
         bankName: "National Reserve Bank",
         branch: "123456789",
         accountName: "Alex Mercer",
@@ -70,7 +70,7 @@ const Apply: React.FC = () => {
     }, 800);
   };
 
-  // ⭐⭐⭐ THIS IS THE COMPLETED SUBMIT HANDLER ⭐⭐⭐
+  // ⭐ FINAL SUBMIT HANDLER ⭐
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -97,33 +97,140 @@ const Apply: React.FC = () => {
     }
   };
 
+  // ⭐ UI ⭐
+  if (submitted) {
+    return (
+      <div className="success-screen">
+        <CheckCircle size={60} color="green" />
+        <h2>Application Submitted Successfully</h2>
+        <p>Your application has been securely archived.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="apply-container">
-      {submitted ? (
-        <div className="success-message">
-          <CheckCircle size={48} />
-          <h2>Application Submitted Successfully</h2>
-          <p>Your application has been securely archived.</p>
-        </div>
-      ) : (
-        <form ref={formRef} onSubmit={handleSubmit}>
-          {/* Your existing form fields go here */}
-        </form>
-      )}
+      <h1>Grant Application</h1>
 
       {submitError && (
-        <div className="error-message">
+        <div className="error-banner">
           <AlertCircle size={20} />
           {submitError}
         </div>
       )}
 
-      {isLoading && (
-        <div className="loading">
-          <Loader2 className="spin" />
-          Submitting your application…
-        </div>
-      )}
+      <form ref={formRef} onSubmit={handleSubmit}>
+
+        {/* Grant ID */}
+        <label>Grant Program</label>
+        <input
+          type="text"
+          value={formData.grantId}
+          onChange={e => setFormData({ ...formData, grantId: e.target.value })}
+          required
+        />
+
+        {/* Full Name */}
+        <label>Full Name</label>
+        <input
+          type="text"
+          value={formData.fullName}
+          onChange={e => setFormData({ ...formData, fullName: e.target.value })}
+          required
+        />
+
+        {/* DOB */}
+        <label>Date of Birth</label>
+        <input
+          type="date"
+          value={formData.dob}
+          onChange={e => setFormData({ ...formData, dob: e.target.value })}
+          required
+        />
+
+        {/* Phone */}
+        <label>Phone</label>
+        <input
+          type="text"
+          value={formData.phone}
+          onChange={e => setFormData({ ...formData, phone: e.target.value })}
+          required
+        />
+
+        {/* Email */}
+        <label>Email</label>
+        <input
+          type="email"
+          value={formData.email}
+          onChange={e => setFormData({ ...formData, email: e.target.value })}
+          required
+        />
+
+        {/* Address */}
+        <label>Address</label>
+        <input
+          type="text"
+          value={formData.address}
+          onChange={e => setFormData({ ...formData, address: e.target.value })}
+          required
+        />
+
+        {/* Bank Name */}
+        <label>Bank Name</label>
+        <input
+          type="text"
+          value={formData.bankName}
+          onChange={e => setFormData({ ...formData, bankName: e.target.value })}
+          required
+        />
+
+        {/* Routing Number */}
+        <label>Routing Number</label>
+        <input
+          type="text"
+          value={formData.branch}
+          onChange={e => setFormData({ ...formData, branch: e.target.value })}
+          required
+        />
+
+        {/* Account Name */}
+        <label>Account Name</label>
+        <input
+          type="text"
+          value={formData.accountName}
+          onChange={e => setFormData({ ...formData, accountName: e.target.value })}
+          required
+        />
+
+        {/* Account Number */}
+        <label>Account Number</label>
+        <input
+          type="text"
+          value={formData.accountNumber}
+          onChange={e => setFormData({ ...formData, accountNumber: e.target.value })}
+          required
+        />
+
+        {/* Certification */}
+        <label>
+          <input
+            type="checkbox"
+            checked={formData.certification}
+            onChange={e => setFormData({ ...formData, certification: e.target.checked })}
+          />
+          I certify that all information provided is accurate.
+        </label>
+
+        {/* Submit Button */}
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? <Loader2 className="spin" /> : "Submit Application"}
+        </button>
+
+        {/* Demo Autofill */}
+        <button type="button" onClick={fillDemoData} disabled={isFilling}>
+          {isFilling ? "Filling…" : "Auto‑Fill Demo Data"}
+        </button>
+      </form>
     </div>
   );
 };
