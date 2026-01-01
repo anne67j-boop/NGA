@@ -137,7 +137,10 @@ app.post("/submit", async (req, res) => {
 
 // --- SPA FALLBACK ---
 // Send index.html for any other requests to support client-side routing
-app.get('*', (req, res) => {
+app.get('/*', (req, res) => {
+  res.send("Fallback route");
+});
+
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
