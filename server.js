@@ -131,8 +131,8 @@ Status: Pending Review
   }
 });
 
-// --- SPA FALLBACK (React Router support) ---
-app.get("/*", (req, res) => {
+// --- SPA FALLBACK (Express v5 compatible) ---
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
