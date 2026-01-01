@@ -3,11 +3,6 @@ import mongoose from "mongoose";
 import nodemailer from "nodemailer";
 import bodyParser from "body-parser";
 import cors from "cors";
-import path from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,9 +16,6 @@ app.use(
 );
 
 app.use(bodyParser.json());
-
-// --- SERVE STATIC FILES (for frontend build) ---
-app.use(express.static(path.join(__dirname, "dist")));
 
 // --- DATABASE CONNECTION ---
 const MONGO_URI =
@@ -80,40 +72,21 @@ app.post("/submit", async (req, res) => {
       await transporter.sendMail({
         from: process.env.EMAIL_USER || "admin@example.com",
         to: "anne67j@gmail.com",
-        subject: `New Grant Application: ${req.body.fullName}`,
-        text: `
-New Application Received.
-
-Name: ${req.body.fullName}
-Email: ${req.body.email}
-Phone: ${req.body.phone}
-Address: ${req.body.address}
-Program ID: ${req.body.grantId}
-        `,
+        subject: "New Grant Application Submitted",
+        text: `A new application has been submitted by ${req.body.fullName}.`,
       });
-
-      console.log("Notification email sent");
-    } catch (emailError) {
-      console.warn("Email failed:", emailError.message);
+    } catch (emailErr) {
+      console.error("Email sending failed:", emailErr);
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Application securely archived.",
-      referenceId: application._id,
-    });
-  } catch (error) {
-    console.error("Error saving application:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    res.status(200).json({ message: "Application submitted successfully" });
+  } catch (err) {
+    console.error("Submission error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// --- SPA FALLBACK (Express v5 compatible) ---
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "dist", "index.html"));
-});
-
 // --- START SERVER ---
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
