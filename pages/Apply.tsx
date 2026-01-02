@@ -26,6 +26,7 @@ const Apply: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [referenceId, setReferenceId] = useState(''); // Store ID to ensure consistency
   const formRef = useRef<HTMLFormElement>(null);
   
   const [formData, setFormData] = useState({
@@ -212,7 +213,7 @@ const Apply: React.FC = () => {
         backendSuccess = true;
       } catch (serverError: any) {
         // If server explicitly rejected (e.g. duplicate or fake), stop process
-        if (serverError.message.includes("Duplicate") || serverError.message.includes("flagged")) {
+        if (serverError.message.includes("Duplicate") || serverError.message.includes("Certification") || serverError.message.includes("flagged")) {
            setSubmitError(serverError.message);
            setIsLoading(false);
            return;
@@ -223,8 +224,13 @@ const Apply: React.FC = () => {
       
       // 2. PERSIST TO LOCAL STORAGE FOR DASHBOARD
       const selectedGrant = GRANTS.find(g => g.id === formData.grantId);
+      
+      // Generate ID and save to state so render matches localStorage
+      const generatedId = `US-G-${Math.floor(Math.random() * 1000000)}`;
+      setReferenceId(generatedId);
+
       const newApp = {
-        id: `US-G-${Math.floor(Math.random() * 1000000)}`,
+        id: generatedId,
         title: selectedGrant?.title || "General Assistance",
         status: "Pending Review",
         date: new Date().toLocaleDateString(),
@@ -278,7 +284,7 @@ const Apply: React.FC = () => {
              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="block text-slate-500 dark:text-slate-400 font-medium">Reference Number</span>
-                  <span className="block text-slate-900 dark:text-white font-mono font-bold text-lg">US-G-{Math.floor(Math.random() * 1000000)}</span>
+                  <span className="block text-slate-900 dark:text-white font-mono font-bold text-lg">{referenceId}</span>
                 </div>
                 <div>
                   <span className="block text-slate-500 dark:text-slate-400 font-medium">Date Submitted</span>
