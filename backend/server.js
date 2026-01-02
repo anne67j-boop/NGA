@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 // --- SERVE STATIC FILES (Deployment) ---
 // Updated to point to the sibling frontend directory's build output
 app.use(express.static(path.join(__dirname, '../frontend/dist')));
-// Fallback to serving from root if needed during dev, though typically dev servers handle this
+// Fallback to serving from root if needed during dev
 app.use(express.static(path.join(__dirname, '../frontend')));
 
 // --- DATABASE CONNECTION ---
