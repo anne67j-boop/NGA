@@ -1,6 +1,3 @@
-import React from 'react';
-import App from './App';
-
-export default function AppRouter() {
-  return <App />;
-}
+export const navigate = (path: string) => {
+  window.location.hash = path;
+};
