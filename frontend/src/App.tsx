@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, ReactElement } from 'react';
+
 import Layout from './components/Layout';
+
 import Home from './pages/Home';
 import About from './pages/About';
 import Grants from './pages/Grants';
@@ -13,53 +15,81 @@ import Dashboard from './pages/Dashboard';
 import VisionLab from './pages/VisionLab';
 import VProfile from './pages/VProfile';
 
+type RoutePath =
+  | '#/'
+  | '#/about'
+  | '#/grants'
+  | '#/refunds'
+  | '#/apply'
+  | '#/resources'
+  | '#/contact'
+  | '#/eligibility'
+  | '#/login'
+  | '#/dashboard'
+  | '#/visionlab'
+  | '#/vprofile';
+
+const DEFAULT_ROUTE: RoutePath = '#/';
+
+const ROUTES: Record<RoutePath, () => ReactElement> = {
+  '#/': () => <Home />,
+  '#/about': () => <About />,
+  '#/grants': () => <Grants />,
+  '#/refunds': () => <Refunds />,
+  '#/apply': () => <Apply />,
+  '#/resources': () => <Resources />,
+  '#/contact': () => <Contact />,
+  '#/eligibility': () => <Eligibility />,
+  '#/login': () => <Login />,
+  '#/dashboard': () => <Dashboard />,
+  '#/visionlab': () => <VisionLab />,
+  '#/vprofile': () => <VProfile />,
+};
+
+const getInitialHash = (): string => {
+  if (!window.location.hash) {
+    window.location.hash = DEFAULT_ROUTE;
+  }
+  return window.location.hash;
+};
+
+const normalizeHash = (hash: string): RoutePath => {
+  // Strip query params, keep only the path part
+  const path = hash.split('?')[0] as RoutePath;
+
+  if (path in ROUTES) {
+    return path;
+  }
+
+  return DEFAULT_ROUTE;
+};
+
 const App: React.FC = () => {
-  const [currentHash, setCurrentHash] = useState(window.location.hash || '#/');
+  const [currentHash, setCurrentHash] = useState<string>(() => getInitialHash());
 
   useEffect(() => {
-    // Ensure we start with a hash
-    if (!window.location.hash) {
-      window.location.hash = '#/';
-    }
     const handleHashChange = () => {
-      setCurrentHash(window.location.hash);
+      setCurrentHash(window.location.hash || DEFAULT_ROUTE);
     };
+
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
-  const getPage = () => {
-    // Strip query params for routing matching
-    const path = currentHash.split('?')[0];
-    
-    // Check for "naked" paths just in case
-    if (path === '#/login') return <Login />;
-    
-    switch (path) {
-      case '#/': return <Home />;
-      case '#/about': return <About />;
-      case '#/grants': return <Grants />;
-      case '#/refunds': return <Refunds />;
-      case '#/apply': return <Apply />;
-      case '#/resources': return <Resources />;
-      case '#/contact': return <Contact />;
-      case '#/eligibility': return <Eligibility />;
-      case '#/login': return <Login />; 
-      case '#/dashboard': return <Dashboard />;
-      case '#/visionlab': return <VisionLab />;
-      case '#/vprofile': return <VProfile />;
-      default: return <Home />;
-    }
-  };
+  const normalizedPath = normalizeHash(currentHash);
 
-  // Login page standalone check
-  if (currentHash.startsWith('#/login')) {
+  // Login page: render standalone, without Layout
+  if (normalizedPath === '#/login' || currentHash.startsWith('#/login')) {
     return <Login />;
   }
 
+  const PageComponent = ROUTES[normalizedPath] ?? ROUTES[DEFAULT_ROUTE];
+
   return (
     <Layout>
-      {getPage()}
+      <PageComponent />
     </Layout>
   );
 };
