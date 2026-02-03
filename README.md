@@ -1,20 +1,114 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+Application Studio Project – Run and Deploy Guide
 
-# Run and deploy your AI Studio app
+Overview
 
-This contains everything you need to run your app locally.
+This repository provides all the necessary resources to run and deploy your Application Studio project locally and in production environments. It is designed to streamline development, testing, and deployment workflows.
 
-View your app in AI Studio: https://ai.studio/apps/drive/11eV7iS3EeMZvHoonuS3Z7YUWGQC8vsex
+You can view and manage your project in Application Studio:https://app.studio/apps/drive/11eV7iS3EeMZvHoonuS3Z7YUWGQC8vsex
 
-## Run Locally
+Setup
 
-**Prerequisites:**  Node.js
+Prerequisites
 
+Node.js (latest LTS version recommended)
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+npm (comes bundled with Node.js)
+
+Installation
+
+Clone the repository and install dependencies:
+
+npm install
+
+Configuration
+
+Before running the application, configure the environment variables:
+
+Create a .env.local file in the project root (if not already present).
+
+Add your Gemini service key:
+
+GEMINI_API_KEY=your_service_key_here
+
+Deployment
+
+Run Locally
+
+Start the development server:
+
+npm run dev
+
+The application will be available at http://localhost:3000 (default port).
+
+Production Deployment
+
+Build for Production
+
+Generate an optimized production build:
+
+npm run build
+
+Start Production Server
+
+Run the production server:
+
+npm run start
+
+Environment Variables
+
+For production environments, ensure the following variables are set:
+
+GEMINI_API_KEY – valid Gemini service key
+
+NODE_ENV=production – ensures optimized performance
+
+Hosting Options
+
+You can deploy the application to any modern hosting platform. Common options include:
+
+Platform
+
+Deployment Method
+
+Notes
+
+Vercel
+
+Direct GitHub integration
+
+Automatic builds and previews
+
+AWS (Elastic Beanstalk / ECS)
+
+Containerized deployment
+
+Scalable infrastructure
+
+Azure App Service
+
+Node.js runtime support
+
+Enterprise-grade integration
+
+Netlify
+
+Git-based deployment
+
+Fast global CDN
+
+Docker
+
+Containerized image
+
+Portable across environments
+
+Notes
+
+Ensure your Gemini service key is valid and active.
+
+For production deployment, configure logging, monitoring, and scaling policies as required.
+
+Security best practices: never commit .env.local or sensitive keys to version control.
+
+This version now includes enterprise-ready deployment instructions with build steps, environment variables, and hosting options.
+
