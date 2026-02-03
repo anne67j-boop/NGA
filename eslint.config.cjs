@@ -5,13 +5,13 @@
  * - Integrates Prettier (eslint-config-prettier) last to disable conflicts
  *
  * Notes:
- * - Keep tsconfig.json at repo root or update parserOptions.project
- * - Install the devDependencies listed below before running ESLint
+ * - Ensure tsconfig.json is at repo root or update parserOptions.project accordingly
+ * - Install devDependencies (command provided below)
  */
 
 const path = require('path');
 
-// Plugins / configs we import programmatically
+// Programmatic plugin imports
 const reactPlugin = require('eslint-plugin-react');
 const tsPlugin = require('@typescript-eslint/eslint-plugin');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
@@ -20,36 +20,22 @@ const importPlugin = require('eslint-plugin-import');
 const prettierConfig = require('eslint-config-prettier');
 
 const getConfigRules = (cfg) => (cfg && cfg.rules) ? cfg.rules : {};
-const getConfigSettings = (cfg) => (cfg && cfg.settings) ? cfg.settings : {};
-const getConfigLanguageOptions = (cfg) => (cfg && cfg.languageOptions) ? cfg.languageOptions : {};
-
 const reactRecommendedRules = getConfigRules(reactPlugin.configs && reactPlugin.configs.recommended);
 const tsRecommendedRules = getConfigRules(tsPlugin.configs && tsPlugin.configs.recommended);
 const reactHooksRecommendedRules = getConfigRules(reactHooksPlugin.configs && reactHooksPlugin.configs.recommended);
 const jsxA11yRecommendedRules = getConfigRules(jsxA11yPlugin.configs && jsxA11yPlugin.configs.recommended);
 const importRecommendedRules = getConfigRules(importPlugin.configs && importPlugin.configs.recommended);
-
-// Prettier recommended disables should be applied last
 const prettierRecommendedRules = getConfigRules(prettierConfig && prettierConfig.configs && prettierConfig.configs.recommended);
 
-/**
- * Merge order (later entries override earlier ones):
- * 1. plugin recommended rules
- * 2. project custom rules (below)
- * 3. prettier recommended disables (applied last)
- */
 const mergedRules = {
-  // plugin recommended rule sets
+  // plugin recommended rules
   ...reactRecommendedRules,
   ...tsRecommendedRules,
   ...reactHooksRecommendedRules,
   ...jsxA11yRecommendedRules,
   ...importRecommendedRules,
 
-  // -----------------------------
-  // Project custom rules (your preferences)
-  // -----------------------------
-  // TypeScript hygiene
+  // Project overrides and preferences
   "no-unused-vars": "off",
   "@typescript-eslint/no-unused-vars": [
     "warn",
@@ -64,22 +50,18 @@ const mergedRules = {
     { allowNumber: true, allowBoolean: true, allowAny: false, allowNullish: false }
   ],
 
-  // React
   "react/react-in-jsx-scope": "off",
   "react/prop-types": "off",
   "react/jsx-uses-vars": "error",
   "react/jsx-key": "error",
   "react/jsx-no-constructed-context-values": "warn",
 
-  // Hooks
   "react-hooks/rules-of-hooks": "error",
   "react-hooks/exhaustive-deps": "warn",
 
-  // Accessibility
   "jsx-a11y/no-autofocus": "off",
   "jsx-a11y/anchor-is-valid": "warn",
 
-  // Imports / order
   "import/no-unresolved": "off",
   "import/order": [
     "warn",
@@ -90,7 +72,6 @@ const mergedRules = {
     }
   ],
 
-  // Best practices / style
   "eqeqeq": ["error", "always"],
   "no-console": ["warn", { allow: ["warn", "error"] }],
   "no-debugger": "warn",
@@ -103,7 +84,7 @@ const mergedRules = {
 Object.assign(mergedRules, prettierRecommendedRules || {});
 
 module.exports = [
-  // Ignore build artifacts and dependencies
+  // Ignore compiled and dependency directories
   {
     ignores: [
       "node_modules/**",
@@ -115,29 +96,25 @@ module.exports = [
     ],
   },
 
-  // Base config for source files
+  // Source files
   {
     files: ["**/*.{ts,tsx,js,jsx,mjs,cjs}"],
     languageOptions: {
       ecmaVersion: 2024,
       sourceType: "module",
       ecmaFeatures: { jsx: true },
-      // parser: for TypeScript projects we rely on @typescript-eslint/parser
       parser: require.resolve("@typescript-eslint/parser"),
       parserOptions: {
-        // adjust if your tsconfig is not at repo root
         project: [path.resolve(__dirname, "./tsconfig.json")],
         tsconfigRootDir: __dirname,
         ecmaVersion: 2024,
         sourceType: "module",
-        sourceTypeOptions: { impliedStrict: true }
       },
       globals: {
         React: "readonly"
       },
     },
 
-    // Plugins (required for some rule names and for merging recommended rules)
     plugins: {
       "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
       react: reactPlugin,
@@ -158,7 +135,7 @@ module.exports = [
     rules: mergedRules,
   },
 
-  // Node / script files
+  // Node / scripts
   {
     files: ["**/*.{cjs,cts,mjs,mts}.js", "scripts/**", "config/**"],
     languageOptions: {
