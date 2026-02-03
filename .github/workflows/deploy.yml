@@ -1,11 +1,33 @@
-- name: Setup Node.js
-  uses: actions/setup-node@v4
-  with:
-    node-version: 20
-    cache: 'npm'
+name: CI
 
-- name: Install dependencies
-  run: npm ci
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
-- name: Run lint
-  run: npm run lint
+jobs:
+  lint-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run lint --fix (optional)
+        if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/heads/') }}
+        run: npm run lint:fix || true
+
+      - name: Build (placeholder — replace with your build step)
+        run: npm run build
