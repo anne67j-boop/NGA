@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: CI Build
 
 on:
   push:
@@ -9,21 +9,17 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
-          # CRITICAL: Point this to your frontend folder's lock file
           cache-dependency-path: './frontend/package-lock.json'
 
       - name: Install Dependencies
-        # Use 'npm ci' for faster, reliable builds in CI environments
         run: npm ci
         working-directory: ./frontend
 
