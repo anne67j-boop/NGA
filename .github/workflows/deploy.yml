@@ -1,12 +1,32 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm' # This is what triggers the lock file check
-          # If your lock file is in the root, you don't need a path here.
+          cache: 'npm'
+          # CRITICAL: Point this to your frontend folder's lock file
+          cache-dependency-path: './frontend/package-lock.json'
+
+      - name: Install Dependencies
+        # Use 'npm ci' for faster, reliable builds in CI environments
+        run: npm ci
+        working-directory: ./frontend
+
+      - name: Build Project
+        run: npm run build
+        working-directory: ./frontend
