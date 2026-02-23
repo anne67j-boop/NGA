@@ -31,7 +31,7 @@ type Route =
 
 const DEFAULT_ROUTE: Route = "#/";
 
-const ROUTE_MAP: Record<Route, JSX.Element> = {
+const ROUTE_MAP: Record<Route, React.JSX.Element => {
   "#/": <Home />,
   "#/about": <About />,
   "#/grants": <Grants />,
