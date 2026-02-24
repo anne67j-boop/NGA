@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import Layout from './components/Layout';
+
 import Home from './pages/Home';
 import About from './pages/About';
 import Grants from './pages/Grants';
+import Refunds from './pages/Refunds';
 import Apply from './pages/Apply';
 import Resources from './pages/Resources';
 import Contact from './pages/Contact';
-import Refunds from './pages/Refunds';
 import Eligibility from './pages/Eligibility';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import VisionLab from './pages/VisionLab';
 import VProfile from './pages/VProfile';
+
 import ChatWidget from './components/ChatWidget';
 
+// -----------------------------
+// Route Types
+// -----------------------------
 type RoutePath =
   | '#/'
   | '#/about'
@@ -30,7 +35,9 @@ type RoutePath =
 
 const DEFAULT_ROUTE: RoutePath = '#/';
 
-// 1. Properly define the ROUTES object outside of the component
+// -----------------------------
+// Route Map
+// -----------------------------
 const ROUTES: Record<RoutePath, React.ComponentType> = {
   '#/': Home,
   '#/about': About,
@@ -46,37 +53,39 @@ const ROUTES: Record<RoutePath, React.ComponentType> = {
   '#/vprofile': VProfile,
 };
 
-const getInitialHash = (): string => {
-  if (!window.location.hash) {
-    window.location.hash = DEFAULT_ROUTE;
-  }
-  return window.location.hash;
+// -----------------------------
+// Helpers
+// -----------------------------
+const getInitialHash = (): RoutePath => {
+  const raw = window.location.hash || DEFAULT_ROUTE;
+  const clean = raw.split('?')[0] as RoutePath;
+  return clean in ROUTES ? clean : DEFAULT_ROUTE;
 };
 
 const normalizeHash = (hash: string): RoutePath => {
-  const path = hash.split('?')[0] as RoutePath;
-  return (path in ROUTES) ? path : DEFAULT_ROUTE;
+  const clean = hash.split('?')[0] as RoutePath;
+  return clean in ROUTES ? clean : DEFAULT_ROUTE;
 };
 
-// 2. Only ONE App component declaration
+// -----------------------------
+// App Component
+// -----------------------------
 const App = (): React.JSX.Element => {
-  const [currentHash, setCurrentHash] = useState<string>(() => getInitialHash());
+  const [currentHash, setCurrentHash] = useState<RoutePath>(() => getInitialHash());
 
   useEffect(() => {
     const handleHashChange = () => {
-      setCurrentHash(window.location.hash || DEFAULT_ROUTE);
+      setCurrentHash(normalizeHash(window.location.hash));
     };
 
     window.addEventListener('hashchange', handleHashChange);
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
+    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   const normalizedPath = normalizeHash(currentHash);
 
-  // Standalone Login page
-  if (normalizedPath === '#/login' || currentHash.startsWith('#/login')) {
+  // Standalone Login Page (no layout)
+  if (normalizedPath === '#/login') {
     return (
       <>
         <Login />
