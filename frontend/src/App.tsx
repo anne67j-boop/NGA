@@ -31,7 +31,7 @@ type RoutePath =
 
 const DEFAULT_ROUTE: RoutePath = '#/';
 
-const ROUTES: Record<RoutePath, () => ReactElement> = {
+const App = (): React.JSX.Element => {
   '#/': () => <Home />,
   '#/about': () => <About />,
   '#/grants': () => <Grants />,
