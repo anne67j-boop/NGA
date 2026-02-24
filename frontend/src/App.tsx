@@ -33,6 +33,8 @@ type RoutePath =
   | '#/visionlab'
   | '#/vprofile';
 
+// IMPORTANT: semicolon above fixes TS1005 errors
+
 const DEFAULT_ROUTE: RoutePath = '#/';
 
 // -----------------------------
