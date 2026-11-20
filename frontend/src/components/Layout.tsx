@@ -66,10 +66,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2">
              <img src="https://upload.wikimedia.org/wikipedia/en/a/a4/Flag_of_the_United_States.svg" alt="US Flag" className="h-3 w-auto" />
-             <span>An official website of the United States Grant Assistance Program</span>
+             <span>Independent information portal — not affiliated with a government agency</span>
           </div>
           <div className="hidden sm:block text-slate-500 dark:text-slate-400">
-            Secure & Verified
+            Verify all program details independently
           </div>
         </div>
       </div>
@@ -88,8 +88,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className="font-serif font-bold text-2xl tracking-tighter">US</span>
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-bold text-slate-900 dark:text-white leading-none group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">National Grant Assistance</span>
-                <span className="text-sm text-slate-600 dark:text-slate-400 font-medium mt-1">Portal for Personal, Business & Health Funding</span>
+                <span className="text-xl font-bold text-slate-900 dark:text-white leading-none group-hover:text-brand-700 dark:group-hover:text-brand-400 transition-colors">Grant Assistance Information</span>
+                <span className="text-sm text-slate-600 dark:text-slate-400 font-medium mt-1">General grant information and official resources</span>
               </div>
             </button>
 
