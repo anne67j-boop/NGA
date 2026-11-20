@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Phone, UserCircle, LayoutDashboard, Sun, Moon } from 'lucide-react';
-import ChatWidget from './ChatWidget';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -229,19 +228,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Programs</h3>
               <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
-                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Personal Relief</button></li>
-                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Small Business (SBA)</button></li>
+                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Personal grant information</button></li>
+                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Small business information</button></li>
                 <li><button onClick={() => navigate('#/eligibility')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Check Eligibility</button></li>
-                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Healthcare Assistance</button></li>
+                <li><button onClick={() => navigate('#/grants')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Healthcare information</button></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Official Tools</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-4">Site navigation</h3>
               <ul className="space-y-3 text-sm text-slate-600 dark:text-slate-400">
                 <li><button onClick={() => navigate('#/dashboard')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">My Dashboard</button></li>
                 <li><button onClick={() => navigate('#/apply')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Check Status</button></li>
-                <li><button onClick={() => navigate('#/contact')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Report Fraud</button></li>
+                <li><button onClick={() => navigate('#/contact')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Contact (unavailable)</button></li>
                 <li><button onClick={() => navigate('#/visionlab')} className="hover:text-brand-700 dark:hover:text-brand-300 hover:underline">Innovation Studio</button></li>
               </ul>
             </div>
@@ -249,7 +248,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <div className="border-t border-slate-300 dark:border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-slate-600 dark:text-slate-400">
              <div className="mb-4 md:mb-0">
-               <span className="font-bold">National Grant Assistance Portal</span> &copy; 2025
+               <span className="font-bold">Independent Grant Information Site</span> &copy; 2025
              </div>
              <div className="flex space-x-6">
                <button onClick={() => navigate('#/refunds')} className="hover:underline hover:text-brand-700 dark:hover:text-brand-300">Refund Policy</button>
@@ -260,8 +259,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
       </footer>
       
-      {/* Automated Response Machine (Chatbot) */}
-      <ChatWidget />
     </div>
   );
 };
