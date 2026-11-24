@@ -2,7 +2,7 @@ name: NGA security, build and end-to-end checks
 
 on:
   push:
-    branches: ["main", "codex/nga-repair-2026-11-20"]
+    branches: ["main", "codex/nga-repair-2026-11-20", "codex/nga-backend-database-2026-11-24"]
   pull_request:
     branches: [main]
 
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   lockfiles:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/codex/nga-repair-2026-11-20'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/codex/nga-repair-2026-11-20' || github.ref == 'refs/heads/codex/nga-backend-database-2026-11-24')
     runs-on: ubuntu-latest
     permissions:
       contents: write
