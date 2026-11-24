@@ -12,7 +12,8 @@ For official U.S. federal grant opportunities and application guidance, visit [G
 
 ## Requirements
 
-- Node.js 20 or later
+- Node.js 22.12 or later
+- npm 10 or later
 - npm
 
 ## Frontend development
