@@ -1,4 +1,4 @@
-import { getSupabaseConfig, sendJson, supabaseRest } from "./_lib/supabase.js";
+import { getSupabaseConfig, sendJson, supabaseRest } from "../backend/lib/supabase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
