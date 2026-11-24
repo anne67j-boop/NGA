@@ -1,73 +1,78 @@
 # Grant Assistance Information Site
 
-This repository currently contains an informational React/Vite frontend and a deliberately limited placeholder API.
+An independent grant-information website. It is **not** a government agency, official grant portal, funding authority, or representative of Grants.gov or any administering agency.
 
-## Current operational status
+## Current product boundary
 
-**Application intake, applicant login, contact delivery, applicant profiles, AI generation, and dashboard records are disabled.** These features must not be presented as operational until the required verified organization, security architecture, and backend services are implemented and tested.
+The site provides public information and links to official sources only. It does not accept grant applications, applicant accounts, identity documents, Social Security numbers, tax identifiers, bank details, payments, or application fees. Eligibility must be confirmed with the administering agency.
 
-This website is independent and is not a U.S. government agency or an official government grant portal. No government endorsement, partnership, or authorization is claimed.
+## Stack
 
-For official U.S. federal grant opportunities and application guidance, visit [Grants.gov](https://www.grants.gov/).
+- React 19 + Vite + TypeScript frontend
+- Vercel Functions for same-origin production API routes in `/api`
+- Supabase Postgres for curated public grant metadata
+- Supabase Data API accessed server-side using publishable/secret keys
 
-## Requirements
+## Local development
 
-- Node.js 22.12 or later
-- npm 10 or later
-- npm
-
-## Frontend development
+Requirements: Node.js 22.12+ and npm 10+.
 
 ```bash
-npm install
+npm ci
 npm run dev
 ```
 
-## Production build
+## Production build and checks
 
 ```bash
 npm run build
-npm run preview
-```
-
-The build command runs TypeScript checks and creates the Vite production bundle in `dist/`. Tailwind CSS is compiled into the bundle; the page does not load the Tailwind CDN, remote fonts, or third-party import maps.
-
-## Verification
-
-```bash
 npm audit --audit-level=moderate
-npm run build
-npx playwright install --with-deps chromium
-npm run test:e2e
 npm audit --prefix backend --audit-level=moderate
 npm test --prefix backend
 ```
 
-The repository commits root and backend npm lockfiles. GitHub Actions installs from those lockfiles with `npm ci`, then runs both dependency audits, the production build, browser end-to-end tests, and backend abuse-case tests. The workflow uses `actions/checkout@v5` and `actions/setup-node@v6`.
+The frontend build runs TypeScript checks and creates the Vite production bundle in `dist/`.
 
-## Placeholder API
+## Production API
 
-The backend is intentionally non-functional for application intake. It exposes only a health endpoint and returns HTTP 503 for `POST /submit`. It does not store, log, email, or process applicant data.
+- `GET /api/health`: reports whether the content database is configured and reachable; never returns credentials.
+- `GET /api/grants`: returns only open, verified, published grant records.
+- `POST /api/admin/grants`: protected server-side content upsert. Requires a separate bearer token and a Supabase secret key. Official notice and agency URLs must use HTTPS on .gov domains.
 
-```bash
-cd backend
-npm install
-npm start
-```
+The legacy local `backend/` Express process is retained for its security regression tests and local placeholder behavior. It is not the production API deployed by the Vite project.
 
-The API binds to loopback (127.0.0.1) by default. It is not a production application backend.
+## Database setup
 
-## Before enabling applicant workflows
+See [database/README.md](database/README.md) and apply [database/schema.sql](database/schema.sql) to the Supabase Postgres project before expecting live records.
 
-A future implementation requires, at minimum:
+Required Vercel Production environment variables:
 
-- Documentary verification of legal ownership, agency relationships, and each advertised funding program.
-- A threat model and privacy impact assessment.
-- Applicant and staff authentication, role-based authorization, session security, and rate limiting.
-- Server-side validation, CSRF protections where applicable, secure secrets management, and strict CORS.
-- Encryption in transit and at rest, least-privilege database access, audit trails, data minimization, retention and deletion controls.
-- Independent security review and automated tests.
-- Verified support and email delivery infrastructure.
-- Server-side AI provider integration; never expose API keys in browser code.
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
+- `SUPABASE_SECRET_KEY` (server-only; never use a `VITE_` prefix)
+- `NGA_CONTENT_ADMIN_TOKEN` (server-only random secret, at least 32 bytes)
+- `NGA_ALLOWED_ORIGINS` (exact production origins)
 
-Do not collect Social Security numbers, tax identifiers, bank account details, or other sensitive information until these controls have been implemented and independently tested.
+No database credentials are committed to this repository. Until the database is provisioned, schema applied, and variables configured, `/api/health` and `/api/grants` deliberately fail closed and the grants page directs visitors to official sources.
+
+## Security controls
+
+- Public database access is limited by Postgres grants and row-level security to verified, published records.
+- Public reads use the publishable key; the secret key is used only inside the server-side content-admin function.
+- Admin writes require a separate bearer token and exact origin allowlisting.
+- Content inputs are length-checked; official source URLs must be HTTPS .gov URLs.
+- No public write endpoint, applicant intake, login, payment, or document-upload endpoint exists.
+- The Vercel deployment applies CSP, HSTS, frame denial, MIME-sniffing protection, referrer policy, and restrictive permissions policy.
+
+## Verification and release requirements
+
+A successful frontend build does not prove database connectivity. Before describing the content backend as live, verify:
+
+1. Supabase project exists and the schema has been applied.
+2. All required variables exist in Vercel Production and no secret is exposed to the browser bundle.
+3. `GET /api/health` returns HTTP 200 with `database: connected`.
+4. `GET /api/grants` returns only verified and published records.
+5. Unauthenticated admin writes return 401; invalid source URLs return 400.
+6. Browser navigation and official-source links work on the production custom domain.
+
+The database starts empty. A human editor must independently check each administering-agency notice before publishing a record.
