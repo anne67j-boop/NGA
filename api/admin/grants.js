@@ -76,6 +76,9 @@ export default async function handler(req, res) {
     return sendJson(res, 503, { error: "CONTENT_DATABASE_NOT_CONFIGURED" });
   }
 
+  const bodySize = Buffer.byteLength(JSON.stringify(req.body ?? null), "utf8");
+  if (bodySize > 8192) return sendJson(res, 413, { error: "REQUEST_TOO_LARGE" });
+
   const record = validateRecord(req.body);
   if (!record) {
     return sendJson(res, 400, {
