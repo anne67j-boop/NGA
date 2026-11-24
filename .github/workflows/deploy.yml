@@ -1,4 +1,4 @@
-name: NGA security and build checks
+name: NGA security, build and end-to-end checks
 
 on:
   push:
@@ -20,12 +20,14 @@ jobs:
           node-version: "22"
       - name: Install frontend dependencies
         run: npm install
-      - name: Dependency vulnerability report
-        run: |
-          npm audit --json > npm-audit.json || true
-          node --input-type=commonjs -e "const a=require('./npm-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2)); for (const [name, issue] of Object.entries(a.vulnerabilities ?? {})) console.log(name + ': ' + issue.severity + ' | fix: ' + JSON.stringify(issue.fixAvailable));"
+      - name: Block known frontend dependency vulnerabilities
+        run: npm audit --audit-level=moderate
       - name: Type-check and production build
         run: npm run build
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+      - name: Run browser end-to-end tests
+        run: npm run test:e2e
 
   backend:
     runs-on: ubuntu-latest
@@ -37,5 +39,7 @@ jobs:
           node-version: "22"
       - name: Install API dependencies
         run: npm install --prefix backend
+      - name: Block known backend dependency vulnerabilities
+        run: npm audit --prefix backend --audit-level=moderate
       - name: Run API abuse-case tests
         run: npm test --prefix backend
