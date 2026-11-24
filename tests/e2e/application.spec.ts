@@ -3,7 +3,9 @@ import { test, expect } from "@playwright/test";
 test("home and information navigation work in a real browser", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveTitle(/Independent Website/);
-  await expect(page.getByRole("heading", { name: /Find verified grant information/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Navigate grant information with clarity and confidence/i })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Explore grant information" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Fees and payment warning" })).toBeVisible();
   await expect(page.getByText(/not a government agency or official grant portal/i)).toBeVisible();
 
   await page.getByRole("link", { name: "Grant information" }).click();
@@ -13,6 +15,24 @@ test("home and information navigation work in a real browser", async ({ page }) 
   await page.getByRole("link", { name: "Eligibility" }).click();
   await expect(page).toHaveURL(/#\/eligibility$/);
   await expect(page.getByRole("heading", { name: /Check eligibility with the administering agency/i })).toBeVisible();
+});
+
+
+test("all public information pages render and remain independent", async ({ page }) => {
+  const pages = [
+    { path: "/#/eligibility", heading: /Check eligibility with the administering agency/i },
+    { path: "/#/resources", heading: /Grant research and application resources/i },
+    { path: "/#/about", heading: /Independent grant information\. Official sources first/i },
+    { path: "/#/refunds", heading: /Fees, refunds and payment warning/i },
+    { path: "/#/contact", heading: /Support and contact/i },
+    { path: "/#/apply", heading: /Application intake is temporarily unavailable/i },
+    { path: "/#/login", heading: /Sign-in is not configured/i },
+  ];
+  for (const item of pages) {
+    await page.goto(item.path);
+    await expect(page.getByRole("heading", { name: item.heading })).toBeVisible();
+    await expect(page.getByText(/not a government agency or official grant portal/i)).toBeVisible();
+  }
 });
 
 test("application and sign-in screens do not collect credentials or applicant data", async ({ page }) => {
