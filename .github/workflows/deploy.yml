@@ -17,16 +17,20 @@ jobs:
     steps:
       - uses: actions/checkout@v5
         with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.event.pull_request.head.ref || github.ref }}
           persist-credentials: true
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
 
-      # The trusted repair-branch push creates and commits lockfiles once.
-      # Pull-request and subsequent runs use npm ci against those committed files.
+      # Generate once on the trusted same-repository repair branch; subsequent
+      # runs install strictly from the committed lockfiles.
       - name: Generate and commit npm lockfiles
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.head.ref || github.ref_name }}
         run: |
           npm install --package-lock-only --ignore-scripts --no-audit --no-fund
           npm --prefix backend install --package-lock-only --ignore-scripts --no-audit --no-fund
@@ -35,11 +39,15 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git commit -m "Add reproducible npm dependency lockfiles"
-            git push
+            git push origin "HEAD:refs/heads/${TARGET_BRANCH}"
           fi
 
       - name: Install frontend dependencies from lockfile
+        if: hashFiles('package-lock.json') != ''
         run: npm ci
+      - name: Install frontend dependencies for external fork
+        if: hashFiles('package-lock.json') == ''
+        run: npm install --ignore-scripts
       - name: Block known frontend dependency vulnerabilities
         run: npm audit --audit-level=moderate
       - name: Type-check and production build
@@ -50,7 +58,11 @@ jobs:
         run: npm run test:e2e
 
       - name: Install API dependencies from lockfile
+        if: hashFiles('backend/package-lock.json') != ''
         run: npm ci --prefix backend
+      - name: Install API dependencies for external fork
+        if: hashFiles('backend/package-lock.json') == ''
+        run: npm install --ignore-scripts --prefix backend
       - name: Block known backend dependency vulnerabilities
         run: npm audit --prefix backend --audit-level=moderate
       - name: Run API abuse-case tests
