@@ -26,6 +26,10 @@ Do not put the Supabase secret key or admin token in source control, frontend va
 
 To withdraw a listing, upsert it with `program_status: "withdrawn"` and `publish: false`. No public deletion or applicant-submission endpoint exists.
 
+## Editorial audit trail
+
+Every insert or update to a grant source writes a separate audit record containing the source ID/slug, operation, prior and new publication state, database role, and timestamp. Public and authenticated roles cannot read or write this audit table. It contains no visitor or applicant data.
+
 ## Important limitations
 
 The code and schema can be reviewed before provisioning, but the database is not live until a Supabase project is connected, the schema is applied, and Vercel Production variables are configured. The initial database is intentionally empty; no grant program is represented as verified by default.
