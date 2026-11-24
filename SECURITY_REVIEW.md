@@ -19,7 +19,8 @@ The project is currently an informational static website with a deliberately dis
 - Added a restrictive browser Content Security Policy meta policy for same-origin scripts, styles, images, fonts, and connections.
 - Added API response headers: no-store, nosniff, frame denial, no-referrer, restricted browser permissions, same-origin resource policy, and a deny-by-default API CSP.
 - Kept the API bound to loopback. Application submissions return HTTP 503; malformed JSON and oversized JSON receive sanitized 400/413 responses.
-- Upgraded Vite from the vulnerable 5.x line to 8.3.8 and its React plugin to 6.3.0. CI now blocks moderate-or-higher dependency advisories.
+- Upgraded Vite from the vulnerable 5.x line to 8.3.8 and its React plugin to 6.3.0.
+- Upgraded Express to 4.22.3 after the backend audit exposed vulnerable transitive `body-parser`, `path-to-regexp`, and `qs` versions. CI now blocks moderate-or-higher dependency advisories.
 
 ## Automated verification
 
