@@ -29,7 +29,20 @@ npm run build
 npm run preview
 ```
 
-The build command runs TypeScript checks and creates the Vite production bundle in `dist/`.
+The build command runs TypeScript checks and creates the Vite production bundle in `dist/`. Tailwind CSS is compiled into the bundle; the page does not load the Tailwind CDN, remote fonts, or third-party import maps.
+
+## Verification
+
+```bash
+npm audit --audit-level=moderate
+npm run build
+npx playwright install --with-deps chromium
+npm run test:e2e
+npm audit --prefix backend --audit-level=moderate
+npm test --prefix backend
+```
+
+The GitHub Actions workflow runs these dependency checks, the production build, browser end-to-end tests, and backend abuse-case tests on the repair branch.
 
 ## Placeholder API
 
