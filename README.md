@@ -43,7 +43,7 @@ npm audit --prefix backend --audit-level=moderate
 npm test --prefix backend
 ```
 
-The GitHub Actions workflow runs these dependency checks, the production build, browser end-to-end tests, and backend abuse-case tests on the repair branch.
+The repository commits root and backend npm lockfiles. GitHub Actions installs from those lockfiles with `npm ci`, then runs both dependency audits, the production build, browser end-to-end tests, and backend abuse-case tests. The workflow uses `actions/checkout@v5` and `actions/setup-node@v6`.
 
 ## Placeholder API
 
