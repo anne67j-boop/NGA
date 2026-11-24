@@ -1,11 +1,13 @@
 import React from "react";
 
 const About: React.FC = () => (
-  <main className="min-h-screen bg-slate-50 px-4 py-16">
-    <section className="mx-auto max-w-3xl rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 className="text-2xl font-bold text-slate-900">About this website</h1>
-      <p className="mt-4 text-slate-700">This is an independent website. No government ownership, endorsement, authorization, or partnership is represented or implied. Organizational credentials and program administration details have not yet been verified.</p>
-    </section>
-  </main>
+  <div className="bg-slate-50 px-4 py-14 dark:bg-slate-950 sm:px-6">
+    <div className="mx-auto max-w-4xl">
+      <header><p className="text-sm font-bold uppercase tracking-wider text-blue-700 dark:text-blue-300">About this project</p><h1 className="mt-3 text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Independent grant information. Official sources first.</h1><p className="mt-5 text-lg leading-8 text-slate-600 dark:text-slate-300">Grant Assistance Information (NGA) is an independent information website intended to help visitors understand grant research and find authoritative public resources.</p></header>
+      <section className="mt-9 rounded-xl border border-slate-200 bg-white p-7 dark:border-slate-800 dark:bg-slate-900"><h2 className="text-xl font-bold text-slate-900 dark:text-white">What this website does</h2><ul className="mt-4 list-disc space-y-3 pl-5 text-sm leading-6 text-slate-700 dark:text-slate-300"><li>Organizes educational information about researching grant opportunities.</li><li>Directs visitors to official government and administering-agency resources.</li><li>Publishes opportunity summaries only when an editor has checked the official source and recorded its source details.</li><li>Encourages visitors to confirm current terms, eligibility and deadlines with the administering agency.</li></ul></section>
+      <section className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-7 dark:border-amber-900 dark:bg-amber-950/30"><h2 className="text-xl font-bold text-amber-950 dark:text-amber-100">Independence and limitations</h2><p className="mt-3 text-sm leading-6 text-amber-950 dark:text-amber-100">NGA is not a government agency, grant-making authority, official grant portal, or representative of Grants.gov, the Small Business Administration, or any federal department. No government affiliation, endorsement, funding authority or partnership is claimed. NGA does not decide eligibility, guarantee awards, accept applications, or distribute public funds.</p></section>
+      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-7 dark:border-slate-800 dark:bg-slate-900"><h2 className="text-xl font-bold text-slate-900 dark:text-white">Editorial approach</h2><p className="mt-3 text-sm leading-6 text-slate-700 dark:text-slate-300">Program requirements and availability can change. Any opportunity shown in the catalogue should identify its administering agency and official notice. A summary on this website is for convenience only; the agency's current notice and instructions take precedence.</p><a href="#/grants" className="mt-5 inline-flex font-semibold text-blue-700 underline dark:text-blue-300">View grant information →</a></section>
+    </div>
+  </div>
 );
 export default About;
