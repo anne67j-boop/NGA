@@ -1,4 +1,4 @@
-import { sendJson, supabaseRest } from "./_lib/supabase.js";
+import { sendJson, supabaseRest } from "../backend/lib/supabase.js";
 
 const PUBLIC_FIELDS = [
   "id",
