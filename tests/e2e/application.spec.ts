@@ -8,7 +8,7 @@ test("home and information navigation work in a real browser", async ({ page }) 
 
   await page.getByRole("link", { name: "Grant information" }).click();
   await expect(page).toHaveURL(/#\/grants$/);
-  await expect(page.getByRole("heading", { name: "Grant listings temporarily withdrawn" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Grant information from official sources" })).toBeVisible();
 
   await page.getByRole("link", { name: "Eligibility" }).click();
   await expect(page).toHaveURL(/#\/eligibility$/);
@@ -31,7 +31,7 @@ test("mobile navigation remains usable and contains no false login or apply acti
   await page.getByRole("button", { name: "Open menu" }).click();
   await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeVisible();
   await page.getByRole("link", { name: "Grant information" }).click();
-  await expect(page.getByRole("heading", { name: "Grant listings temporarily withdrawn" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Grant information from official sources" })).toBeVisible();
   await expect(page.getByRole("button", { name: /login|apply now|start application/i })).toHaveCount(0);
 });
 
