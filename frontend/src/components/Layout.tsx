@@ -11,6 +11,7 @@ const navigation = [
   { label: "Eligibility", href: "#/eligibility" },
   { label: "Resources", href: "#/resources" },
   { label: "About", href: "#/about" },
+  { label: "Contact", href: "#/contact" },
 ];
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
@@ -51,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
           <nav className="hidden items-center gap-1 lg:flex" aria-label="Main navigation">
             {navigation.map((item) => (
-              <a key={item.href} href={item.href} className="rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white">
+              <a key={item.href} href={item.href} aria-current={window.location.hash === item.href ? "page" : undefined} className="rounded px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-200 dark:hover:bg-slate-800 dark:hover:text-white">
                 {item.label}
               </a>
             ))}
@@ -76,7 +77,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         {menuOpen && (
           <nav className="border-t border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 lg:hidden" aria-label="Mobile navigation">
             {navigation.map((item) => (
-              <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="block rounded px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
+              <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)} aria-current={window.location.hash === item.href ? "page" : undefined} className="block rounded px-3 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800">
                 {item.label}
               </a>
             ))}
