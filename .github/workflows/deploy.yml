@@ -10,16 +10,36 @@ permissions:
   contents: read
 
 jobs:
-  frontend:
+  verify:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: true
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "22"
-      - name: Install frontend dependencies
-        run: npm install
+
+      # The trusted repair-branch push creates and commits lockfiles once.
+      # Pull-request and subsequent runs use npm ci against those committed files.
+      - name: Generate and commit npm lockfiles
+        if: github.event_name == 'push'
+        run: |
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm --prefix backend install --package-lock-only --ignore-scripts --no-audit --no-fund
+          git add package-lock.json backend/package-lock.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Add reproducible npm dependency lockfiles"
+            git push
+          fi
+
+      - name: Install frontend dependencies from lockfile
+        run: npm ci
       - name: Block known frontend dependency vulnerabilities
         run: npm audit --audit-level=moderate
       - name: Type-check and production build
@@ -29,16 +49,8 @@ jobs:
       - name: Run browser end-to-end tests
         run: npm run test:e2e
 
-  backend:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Set up Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "22"
-      - name: Install API dependencies
-        run: npm install --prefix backend
+      - name: Install API dependencies from lockfile
+        run: npm ci --prefix backend
       - name: Block known backend dependency vulnerabilities
         run: npm audit --prefix backend --audit-level=moderate
       - name: Run API abuse-case tests
