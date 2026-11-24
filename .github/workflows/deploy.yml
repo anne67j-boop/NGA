@@ -2,7 +2,7 @@ name: NGA security, build and end-to-end checks
 
 on:
   push:
-    branches: ["**"]
+    branches: ["main", "codex/nga-repair-2026-11-20"]
   pull_request:
     branches: [main]
 
