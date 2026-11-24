@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: NGA security and build checks
 
 on:
   push:
@@ -10,15 +10,33 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "20"
-      - name: Install dependencies
+          node-version: "22"
+          cache: "npm"
+      - name: Install frontend dependencies
         run: npm install
-      - name: Type-check and build
+      - name: Dependency vulnerability report
+        run: |
+          npm audit --json > npm-audit.json || true
+          node --input-type=commonjs -e "const a=require('./npm-audit.json'); console.log(JSON.stringify(a.metadata?.vulnerabilities ?? {}, null, 2)); for (const [name, issue] of Object.entries(a.vulnerabilities ?? {})) console.log(name + ': ' + issue.severity + ' | fix: ' + JSON.stringify(issue.fixAvailable));"
+      - name: Type-check and production build
         run: npm run build
+
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install API dependencies
+        run: npm install --prefix backend
+      - name: Run API abuse-case tests
+        run: npm test --prefix backend
