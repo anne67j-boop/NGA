@@ -1,114 +1,73 @@
-Application Studio Project – Run and Deploy Guide
+# Grant Assistance Information Site
 
-Overview
+This repository currently contains an informational React/Vite frontend and a deliberately limited placeholder API.
 
-This repository provides all the necessary resources to run and deploy your Application Studio project locally and in production environments. It is designed to streamline development, testing, and deployment workflows.
+## Current operational status
 
-You can view and manage your project in Application Studio:https://app.studio/apps/drive/11eV7iS3EeMZvHoonuS3Z7YUWGQC8vsex
+**Application intake, applicant login, contact delivery, applicant profiles, AI generation, and dashboard records are disabled.** These features must not be presented as operational until the required verified organization, security architecture, and backend services are implemented and tested.
 
-Setup
+This website is independent and is not a U.S. government agency or an official government grant portal. No government endorsement, partnership, or authorization is claimed.
 
-Prerequisites
+For official U.S. federal grant opportunities and application guidance, visit [Grants.gov](https://www.grants.gov/).
 
-Node.js (latest LTS version recommended)
+## Requirements
 
-npm (comes bundled with Node.js)
+- Node.js 22.12 or later
+- npm 10 or later
+- npm
 
-Installation
+## Frontend development
 
-Clone the repository and install dependencies:
-
+```bash
 npm install
-
-Configuration
-
-Before running the application, configure the environment variables:
-
-Create a .env.local file in the project root (if not already present).
-
-Add your Gemini service key:
-
-GEMINI_API_KEY=your_service_key_here
-
-Deployment
-
-Run Locally
-
-Start the development server:
-
 npm run dev
+```
 
-The application will be available at http://localhost:3000 (default port).
+## Production build
 
-Production Deployment
-
-Build for Production
-
-Generate an optimized production build:
-
+```bash
 npm run build
+npm run preview
+```
 
-Start Production Server
+The build command runs TypeScript checks and creates the Vite production bundle in `dist/`. Tailwind CSS is compiled into the bundle; the page does not load the Tailwind CDN, remote fonts, or third-party import maps.
 
-Run the production server:
+## Verification
 
-npm run start
+```bash
+npm audit --audit-level=moderate
+npm run build
+npx playwright install --with-deps chromium
+npm run test:e2e
+npm audit --prefix backend --audit-level=moderate
+npm test --prefix backend
+```
 
-Environment Variables
+The repository commits root and backend npm lockfiles. GitHub Actions installs from those lockfiles with `npm ci`, then runs both dependency audits, the production build, browser end-to-end tests, and backend abuse-case tests. The workflow uses `actions/checkout@v5` and `actions/setup-node@v6`.
 
-For production environments, ensure the following variables are set:
+## Placeholder API
 
-GEMINI_API_KEY – valid Gemini service key
+The backend is intentionally non-functional for application intake. It exposes only a health endpoint and returns HTTP 503 for `POST /submit`. It does not store, log, email, or process applicant data.
 
-NODE_ENV=production – ensures optimized performance
+```bash
+cd backend
+npm install
+npm start
+```
 
-Hosting Options
+The API binds to loopback (127.0.0.1) by default. It is not a production application backend.
 
-You can deploy the application to any modern hosting platform. Common options include:
+## Before enabling applicant workflows
 
-Platform
+A future implementation requires, at minimum:
 
-Deployment Method
+- Documentary verification of legal ownership, agency relationships, and each advertised funding program.
+- A threat model and privacy impact assessment.
+- Applicant and staff authentication, role-based authorization, session security, and rate limiting.
+- Server-side validation, CSRF protections where applicable, secure secrets management, and strict CORS.
+- Encryption in transit and at rest, least-privilege database access, audit trails, data minimization, retention and deletion controls.
+- Independent security review and automated tests.
+- Verified support and email delivery infrastructure.
+- Server-side AI provider integration; never expose API keys in browser code.
 
-Notes
-
-Vercel
-
-Direct GitHub integration
-
-Automatic builds and previews
-
-AWS (Elastic Beanstalk / ECS)
-
-Containerized deployment
-
-Scalable infrastructure
-
-Azure App Service
-
-Node.js runtime support
-
-Enterprise-grade integration
-
-Netlify
-
-Git-based deployment
-
-Fast global CDN
-
-Docker
-
-Containerized image
-
-Portable across environments
-
-Notes
-
-Ensure your Gemini service key is valid and active.
-
-For production deployment, configure logging, monitoring, and scaling policies as required.
-
-Security best practices: never commit .env.local or sensitive keys to version control.
-
-This version now includes enterprise-ready deployment instructions with build steps, environment variables, and hosting options.
-
+Do not collect Social Security numbers, tax identifiers, bank account details, or other sensitive information until these controls have been implemented and independently tested.

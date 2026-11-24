@@ -1,137 +1,60 @@
 import express from "express";
-import mongoose from "mongoose";
-import nodemailer from "nodemailer";
-import bodyParser from "body-parser";
-import cors from "cors";
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = Number(process.env.PORT || 5000);
 
-// Allow requests from your frontend
-app.use(cors({
-  origin: "*", 
-  methods: ["POST", "GET"]
-}));
+// This placeholder API deliberately has no application, account, database,
+// email, or AI functionality. Never log request bodies or accept applicant data.
+app.disable("x-powered-by");
 
-app.use(bodyParser.json());
-
-// --- SERVE STATIC FILES (Deployment) ---
-// Updated to point to the sibling frontend directory's build output
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
-// Fallback to serving from root if needed during dev
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// --- DATABASE CONNECTION ---
-const MONGO_URI = process.env.MONGO_URI || "mongodb://localhost:27017/grant_portal";
-
-mongoose.connect(MONGO_URI)
-  .then(() => console.log("Connected to MongoDB"))
-  .catch(err => console.error("MongoDB connection error:", err));
-
-// --- SCHEMA ---
-const ApplicationSchema = new mongoose.Schema({
-  grantId: { type: String, required: true },
-  fullName: { type: String, required: true },
-  dob: String,
-  phone: String,
-  email: { type: String, required: true },
-  address: String,
-  ssn: String,
-  bankName: String,
-  routingNumber: String,
-  accountName: String,
-  accountNumber: String,
-  certification: Boolean,
-  signature: { type: String, required: true },
-  status: { type: String, default: "Pending Review" },
-  submittedAt: { type: Date, default: Date.now },
+app.use((_req, res, next) => {
+  res.set({
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "no-referrer",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Cross-Origin-Resource-Policy": "same-origin",
+    "Content-Security-Policy": "default-src 'none'; frame-ancestors 'none'",
+  });
+  next();
 });
 
-ApplicationSchema.index({ email: 1, grantId: 1 }, { unique: true });
-const Application = mongoose.model("Application", ApplicationSchema);
+// A small parser limit protects this disabled endpoint from oversized JSON.
+// The body is never persisted, forwarded, emailed, or written to logs.
+app.use(express.json({ limit: "1kb", strict: true }));
 
-// --- EMAIL TRANSPORT ---
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER || "admin@example.com", 
-    pass: process.env.EMAIL_PASS || "password",   
-  },
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok", applicationIntake: "disabled" });
 });
 
-// --- HELPER: DETECT FAKE DATA ---
-const isSuspicious = (data) => {
-  const patterns = [
-    /test/i, /demo/i, /fake/i, /123456789/, /987654321/, /000000000/, /555-555-5555/, /123 Main St/i
-  ];
-  const values = Object.values(data).join(' ');
-  return patterns.some(pattern => pattern.test(values));
-};
+app.post("/submit", (_req, res) => {
+  res.status(503).json({
+    success: false,
+    code: "INTAKE_UNAVAILABLE",
+    message: "Application intake is disabled. Do not send personal or financial information.",
+  });
+});
 
-// --- ROUTE TO HANDLE FORM SUBMISSION ---
-app.post("/submit", async (req, res) => {
-  try {
-    console.log("Received submission:", req.body);
-    
-    if (isSuspicious(req.body)) {
-       return res.status(400).json({ 
-         success: false, 
-         message: "Submission flagged for invalid or test data. Please provide verifiable information." 
-       });
-    }
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Not found" });
+});
 
-    if (!req.body.signature || req.body.signature.trim().toLowerCase() !== req.body.fullName.trim().toLowerCase()) {
-       return res.status(400).json({ 
-         success: false, 
-         message: "Certification Failed: Digital Signature does not match the applicant's full legal name." 
-       });
-    }
-
-    const applicationData = {
-      ...req.body,
-      routingNumber: req.body.branch 
-    };
-
-    const application = new Application(applicationData);
-    await application.save();
-
-    try {
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER || "admin@example.com",
-        to: "anne67j@gmail.com",
-        subject: `New Grant Application: ${req.body.fullName}`,
-        text: `New Application Received.\nName: ${req.body.fullName}\nID: ${req.body.grantId}\nSigned: ${req.body.signature}`,
-      });
-    } catch (emailError) {
-      console.warn("Email failed to send:", emailError.message);
-    }
-
-    res.status(200).json({ 
-      success: true, 
-      message: "Application securely archived.", 
-      referenceId: application._id 
-    });
-
-  } catch (error) {
-    console.error("Error saving application:", error);
-    if (error.code === 11000) {
-      return res.status(409).json({ 
-        success: false, 
-        message: "Duplicate Application: An application for this Grant ID has already been submitted with this email address." 
-      });
-    }
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+// Return sanitized parser errors; never expose stack traces or submitted content.
+app.use((error, _req, res, _next) => {
+  if (error?.type === "entity.too.large") {
+    return res.status(413).json({ success: false, message: "Request body too large" });
   }
+  if (error instanceof SyntaxError && "body" in error) {
+    return res.status(400).json({ success: false, message: "Malformed JSON" });
+  }
+  return res.status(400).json({ success: false, message: "Invalid request" });
 });
 
-// --- SPA FALLBACK ---
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
-});
+if (!Number.isInteger(port) || port < 0 || port > 65535) {
+  throw new Error("PORT must be an integer between 0 and 65535");
+}
 
-app.listen(PORT, () => console.log(`Server running securely on http://localhost:${PORT}`));
+app.listen(port, "127.0.0.1", () => {
+  console.log(`NGA placeholder API listening on 127.0.0.1:${port}`);
+});
