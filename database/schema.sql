@@ -86,7 +86,7 @@ returns trigger
 language plpgsql
 security definer
 set search_path = ''
-as $
+as $$
 begin
   insert into public.grant_source_audit (
     grant_source_id,
