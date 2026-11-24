@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { isOfficialAgencyUrl, sendJson, supabaseRest } from "../_lib/supabase.js";
+import { isOfficialAgencyUrl, sendJson, supabaseRest } from "../../backend/lib/supabase.js";
 
 function safeEqual(left, right) {
   const a = Buffer.from(left || "", "utf8");
