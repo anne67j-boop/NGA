@@ -61,3 +61,57 @@ drop trigger if exists grant_sources_updated_at on public.grant_sources;
 create trigger grant_sources_updated_at
 before update on public.grant_sources
 for each row execute function public.set_grant_sources_updated_at();
+
+-- Append-only metadata audit trail. It records editorial publication state changes,
+-- not visitor or applicant information.
+create table if not exists public.grant_source_audit (
+  id uuid primary key default gen_random_uuid(),
+  grant_source_id uuid not null,
+  slug text not null,
+  action text not null check (action in ('insert', 'update')),
+  previous_status text,
+  current_status text not null,
+  previous_published boolean,
+  current_published boolean not null,
+  actor_role text not null,
+  changed_at timestamptz not null default now()
+);
+
+alter table public.grant_source_audit enable row level security;
+revoke all on public.grant_source_audit from anon, authenticated;
+grant all on public.grant_source_audit to service_role;
+
+create or replace function public.audit_grant_source_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.grant_source_audit (
+    grant_source_id,
+    slug,
+    action,
+    previous_status,
+    current_status,
+    previous_published,
+    current_published,
+    actor_role
+  ) values (
+    new.id,
+    new.slug,
+    tg_op::text,
+    case when tg_op = 'UPDATE' then old.verification_status else null end,
+    new.verification_status,
+    case when tg_op = 'UPDATE' then old.is_published else null end,
+    new.is_published,
+    coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), current_user)
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists grant_sources_audit on public.grant_sources;
+create trigger grant_sources_audit
+after insert or update on public.grant_sources
+for each row execute function public.audit_grant_source_change();
