@@ -80,10 +80,6 @@ export default async function handler(req, res) {
       method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(record),
     });
     if (!saved.ok) {
-      if (attachment) await fetch(process.env.SUPABASE_URL.replace(/\/$/, "") + "/storage/v1/object/nga-private-attachments/" + attachment.storage_path, {
-        method: "DELETE",
-        headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY },
-      }).catch(() => {});
       return reply(res, 502, { message: "The application could not be saved. Please try again later." });
     }
     const [row] = await saved.json();
