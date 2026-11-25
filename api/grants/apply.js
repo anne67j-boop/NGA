@@ -1,7 +1,5 @@
 import { randomBytes } from "node:crypto";
 
-const MAX_FILE_BYTES = 10 * 1024 * 1024;
-const ALLOWED_TYPES = new Set(["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]);
 const clean = (v, max = 4000) => typeof v === "string" ? v.trim().slice(0, max) : "";
 const html = (v) => String(v ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 
