@@ -12,7 +12,7 @@ For official U.S. federal grant opportunities and application guidance, visit [G
 
 ## Requirements
 
-- Node.js 22.12 or later
+- Node.js 22.12 or later (through Node.js 24.x)
 - npm 10 or later
 - npm
 
