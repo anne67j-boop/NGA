@@ -47,15 +47,9 @@ export default async function handler(req, res) {
     return reply(res, 503, { code: "INTAKE_NOT_CONFIGURED", message: "Application intake is not configured. No application data was accepted." });
   }
 
-  let attachment = null;
   try {
-    let data = req.body || {};
-    let file = null;
-    if ((req.headers["content-type"] || "").includes("multipart/form-data")) {
-      data = await req.formData();
-      file = data.get("document");
-    }
-    const get = (key) => data instanceof FormData ? data.get(key) : data[key];
+    const data = req.body && typeof req.body === "object" ? req.body : {};
+    const get = (key) => data[key];
     const applicantName = clean(get("applicantName"), 200);
     const email = clean(get("email"), 255).toLowerCase();
     const grantId = clean(get("grantId"), 120);
@@ -76,25 +70,11 @@ export default async function handler(req, res) {
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return reply(res, 400, { message: "Enter a valid email address." });
 
-    if (file && typeof file === "object" && file.size > 0) {
-      if (!ALLOWED_TYPES.has(file.type)) return reply(res, 415, { message: "Only PDF, DOC, or DOCX files are accepted." });
-      if (file.size > MAX_FILE_BYTES) return reply(res, 413, { message: "Attachment must be 10 MB or smaller." });
-      const ext = (file.name.split(".").pop() || "file").replace(/[^a-zA-Z0-9]/g, "").slice(0, 8);
-      const objectPath = "pending/" + randomBytes(16).toString("hex") + "." + ext;
-      const upload = await fetch(process.env.SUPABASE_URL.replace(/\/$/, "") + "/storage/v1/object/nga-private-attachments/" + objectPath, {
-        method: "POST",
-        headers: { apikey: process.env.SUPABASE_SERVICE_ROLE_KEY, Authorization: "Bearer " + process.env.SUPABASE_SERVICE_ROLE_KEY, "Content-Type": file.type, "x-upsert": "false" },
-        body: Buffer.from(await file.arrayBuffer()),
-      });
-      if (!upload.ok) return reply(res, 502, { message: "Attachment storage failed. Please retry without the file or contact the administrator." });
-      attachment = { file_name: clean(file.name, 255), mime_type: file.type, size_bytes: file.size, storage_path: objectPath };
-    }
-
     const referenceId = "NGA-" + new Date().getUTCFullYear() + "-" + randomBytes(4).toString("hex").toUpperCase();
     const record = {
       reference_id: referenceId, grant_slug: grantId, grant_title: grantTitle, applicant_name: applicantName,
       email, phone, street_address: address, city, state, postal_code: postalCode, purpose, income_range: incomeRange,
-      application_data: { certification, signature }, status: "SUBMITTED", attachment,
+      application_data: { certification, signature }, status: "SUBMITTED",
     };
     const saved = await db("grant_applications?select=id,reference_id,submitted_at", {
       method: "POST", headers: { Prefer: "return=representation" }, body: JSON.stringify(record),
