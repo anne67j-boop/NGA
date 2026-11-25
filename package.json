@@ -9,7 +9,7 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json && vite build",
+    "build": "node --test api/grants/apply.test.js && tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test",
     "audit:production": "node scripts/audit-production.mjs",
