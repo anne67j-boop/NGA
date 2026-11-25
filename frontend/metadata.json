@@ -1,7 +1,5 @@
 {
-  "name": "National Grant Assistance",
-  "description": "The official government-backed portal for personal, business, and home equity grant applications. Secure, accessible, and fraud-free funding assistance.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "name": "Grant Assistance Information",
+  "description": "Independent grant research, education and website-building project.",
+  "requestFramePermissions": []
 }

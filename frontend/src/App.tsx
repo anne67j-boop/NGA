@@ -14,11 +14,6 @@ import Dashboard from './pages/Dashboard';
 import VisionLab from './pages/VisionLab';
 import VProfile from './pages/VProfile';
 
-import ChatWidget from './components/ChatWidget';
-
-// -----------------------------
-// Route Types
-// -----------------------------
 type RoutePath =
   | '#/'
   | '#/about'
@@ -33,13 +28,8 @@ type RoutePath =
   | '#/visionlab'
   | '#/vprofile';
 
-// IMPORTANT: semicolon above fixes TS1005 errors
-
 const DEFAULT_ROUTE: RoutePath = '#/';
 
-// -----------------------------
-// Route Map
-// -----------------------------
 const ROUTES: Record<RoutePath, React.ComponentType> = {
   '#/': Home,
   '#/about': About,
@@ -55,53 +45,24 @@ const ROUTES: Record<RoutePath, React.ComponentType> = {
   '#/vprofile': VProfile,
 };
 
-// -----------------------------
-// Helpers
-// -----------------------------
-const getInitialHash = (): RoutePath => {
-  const raw = window.location.hash || DEFAULT_ROUTE;
-  const clean = raw.split('?')[0] as RoutePath;
-  return clean in ROUTES ? clean : DEFAULT_ROUTE;
-};
-
 const normalizeHash = (hash: string): RoutePath => {
   const clean = hash.split('?')[0] as RoutePath;
   return clean in ROUTES ? clean : DEFAULT_ROUTE;
 };
 
-// -----------------------------
-// App Component
-// -----------------------------
 const App = (): React.JSX.Element => {
-  const [currentHash, setCurrentHash] = useState<RoutePath>(() => getInitialHash());
+  const [currentHash, setCurrentHash] = useState<RoutePath>(() => normalizeHash(window.location.hash || DEFAULT_ROUTE));
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setCurrentHash(normalizeHash(window.location.hash));
-    };
-
+    const handleHashChange = () => setCurrentHash(normalizeHash(window.location.hash));
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
-  const normalizedPath = normalizeHash(currentHash);
-
-  // Standalone Login Page (no layout)
-  if (normalizedPath === '#/login') {
-    return (
-      <>
-        <Login />
-        <ChatWidget />
-      </>
-    );
-  }
-
-  const PageComponent = ROUTES[normalizedPath] || ROUTES[DEFAULT_ROUTE];
-
+  const PageComponent = ROUTES[normalizeHash(currentHash)];
   return (
     <Layout>
       <PageComponent />
-      <ChatWidget />
     </Layout>
   );
 };

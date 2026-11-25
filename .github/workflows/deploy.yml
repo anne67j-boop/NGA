@@ -1,20 +1,76 @@
-name: Build and Deploy
+name: NGA security, build and end-to-end checks
+
 on:
   push:
-    branches: [ main ]
+    branches: ["main", "codex/nga-repair-2026-11-20", "codex/nga-backend-database-2026-11-24"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
 jobs:
-  build:
+  lockfiles:
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/codex/nga-repair-2026-11-20' || github.ref == 'refs/heads/codex/nga-backend-database-2026-11-24')
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
         with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
-      - name: Install & Build
+          ref: ${{ github.ref }}
+          persist-credentials: true
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Generate and commit npm lockfiles
         run: |
-          npm install
-          npm run build
-        working-directory: ./frontend
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm --prefix backend install --package-lock-only --ignore-scripts --no-audit --no-fund
+          git add package-lock.json backend/package-lock.json
+          if ! git diff --cached --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git commit -m "Add reproducible npm dependency lockfiles"
+            git push
+          fi
+
+  verify:
+    needs: lockfiles
+    if: always() && (needs.lockfiles.result == 'success' || needs.lockfiles.result == 'skipped')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event_name == 'push' && github.ref || github.sha }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+      - name: Install frontend dependencies from lockfile
+        if: hashFiles('package-lock.json') != ''
+        run: npm ci
+      - name: Install frontend dependencies when no lockfile exists
+        if: hashFiles('package-lock.json') == ''
+        run: npm install --ignore-scripts
+      - name: Block known frontend dependency vulnerabilities
+        run: npm audit --audit-level=moderate
+      - name: Type-check and production build
+        run: npm run build
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+      - name: Run browser end-to-end tests
+        run: npm run test:e2e
+      - name: Install API dependencies from lockfile
+        if: hashFiles('backend/package-lock.json') != ''
+        run: npm ci --prefix backend
+      - name: Install API dependencies when no lockfile exists
+        if: hashFiles('backend/package-lock.json') == ''
+        run: npm install --ignore-scripts --prefix backend
+      - name: Block known backend dependency vulnerabilities
+        run: npm audit --prefix backend --audit-level=moderate
+      - name: Run API abuse-case tests
+        run: npm test --prefix backend
