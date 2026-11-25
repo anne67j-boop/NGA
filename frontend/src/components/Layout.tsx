@@ -9,8 +9,11 @@ const navigation = [
   { label: "Home", href: "#/" },
   { label: "Grant information", href: "#/grants" },
   { label: "Eligibility", href: "#/eligibility" },
+  { label: "Apply", href: "#/apply" },
   { label: "Resources", href: "#/resources" },
   { label: "About", href: "#/about" },
+  { label: "Dashboard", href: "#/dashboard" },
+  { label: "Profile", href: "#/vprofile" },
 ];
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
