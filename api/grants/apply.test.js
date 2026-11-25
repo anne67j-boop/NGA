@@ -105,7 +105,7 @@ test("stores a valid synthetic submission and returns its reference", async () =
   const res = response();
   await handler({ method: "POST", body: validBody }, res);
   assert.equal(res.statusCode, 201);
-  assert.match(res.body.referenceId, /^NGA-\\d{4}-[A-F0-9]{8}$/);
+  assert.match(res.body.referenceId, /^NGA-\d{4}-[A-F0-9]{8}$/);
   assert.equal(res.body.emailSent, false);
 });
 
