@@ -4,7 +4,7 @@ This repository currently contains an informational React/Vite frontend and a de
 
 ## Current operational status
 
-**Application intake, applicant login, contact delivery, applicant profiles, AI generation, and dashboard records are disabled.** These features must not be presented as operational until the required verified organization, security architecture, and backend services are implemented and tested.
+**Application intake is implemented as a demonstration workflow but remains disabled until Supabase environment variables are configured and the release gates in `docs/APPLICATION_INTAKE_SETUP.md` are completed.** Applicant login, staff authentication, contact delivery, and AI generation are not operational.
 
 This website is independent and is not a U.S. government agency or an official government grant portal. No government endorsement, partnership, or authorization is claimed.
 
@@ -45,17 +45,11 @@ npm test --prefix backend
 
 The repository commits root and backend npm lockfiles. GitHub Actions installs from those lockfiles with `npm ci`, then runs both dependency audits, the production build, browser end-to-end tests, and backend abuse-case tests. The workflow uses `actions/checkout@v5` and `actions/setup-node@v6`.
 
-## Placeholder API
+## Application intake API
 
-The backend is intentionally non-functional for application intake. It exposes only a health endpoint and returns HTTP 503 for `POST /submit`. It does not store, log, email, or process applicant data.
+The Vercel serverless endpoint `POST /api/grants/apply` validates the tutorial form and persists submissions through Supabase Postgres. It returns HTTP 503 until the server-side Supabase environment variables are configured. Optional email receipts use Resend. Setup, limitations, and verification steps are documented in `docs/APPLICATION_INTAKE_SETUP.md`.
 
-```bash
-cd backend
-npm install
-npm start
-```
-
-The API binds to loopback (127.0.0.1) by default. It is not a production application backend.
+The legacy `backend/` Express service remains a local placeholder and is not the Vercel production intake API.
 
 ## Before enabling applicant workflows
 
