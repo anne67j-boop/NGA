@@ -12,7 +12,8 @@
     "build": "tsc -p tsconfig.json && vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test",
-    "audit:production": "node scripts/audit-production.mjs"
+    "audit:production": "node scripts/audit-production.mjs",
+    "test": "node --test"
   },
   "dependencies": {
     "lucide-react": "0.563.0",
