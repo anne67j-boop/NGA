@@ -32,6 +32,7 @@ const Apply: React.FC = () => {
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [submitted, setSubmitted] = useState<Application | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.hash.split("?")[1] || "");
@@ -95,22 +96,53 @@ const Apply: React.FC = () => {
     setError("");
   };
 
-  const submit = () => {
+  const submit = async () => {
     const message = validate();
     if (message) { setError(message); return; }
-    const id = `NGA-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-    const application: Application = {
-      id,
-      grantId: form.grantId,
-      grantTitle: selectedGrant?.title || "General Assistance",
-      status: "Submitted",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      data: form,
-    };
-    const existing = storage.getApplications().filter((item) => item.id !== "draft-current");
-    storage.saveApplications([application, ...existing]);
-    setSubmitted(application);
+    if (submitting) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      const response = await fetch("/api/grants/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          grantId: form.grantId,
+          grantTitle: selectedGrant?.title || "General Assistance",
+          applicantName: `${form.firstName} ${form.lastName}`.trim(),
+          email: form.email,
+          phone: form.phone,
+          address: form.address,
+          city: form.city,
+          state: form.state,
+          postalCode: form.zip,
+          purpose: form.assistancePurpose,
+          incomeRange: form.incomeRange,
+          certification: form.certification,
+          signature: form.signature,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok || !result.referenceId) {
+        throw new Error(result.message || "The application could not be saved. Please try again.");
+      }
+      const application: Application = {
+        id: result.referenceId,
+        grantId: form.grantId,
+        grantTitle: selectedGrant?.title || "General Assistance",
+        status: "Submitted",
+        createdAt: result.submittedAt || new Date().toISOString(),
+        updatedAt: result.submittedAt || new Date().toISOString(),
+        data: form,
+      };
+      const existing = storage.getApplications().filter((item) => item.id !== "draft-current");
+      storage.saveApplications([application, ...existing]);
+      setSubmitted(application);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Submission failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (submitted) {
@@ -119,7 +151,7 @@ const Apply: React.FC = () => {
         <section className="mx-auto max-w-2xl rounded-xl border border-green-200 bg-white p-8 shadow-sm dark:border-green-900 dark:bg-slate-900">
           <CheckCircle2 className="h-12 w-12 text-green-600" />
           <h1 className="mt-4 text-3xl font-bold text-slate-900 dark:text-white">Application submitted</h1>
-          <p className="mt-3 text-slate-600 dark:text-slate-300">Your application was saved to this browser for this tutorial. No government submission or funding decision has been made.</p>
+          <p className="mt-3 text-slate-600 dark:text-slate-300">Your application record was saved to the NGA demonstration database. This independent information website is not a government agency or official grant portal. No government submission or funding decision has been made.</p>
           <div className="mt-6 rounded-lg bg-slate-100 p-5 dark:bg-slate-800">
             <div className="text-xs font-semibold uppercase text-slate-500">Reference</div>
             <div className="mt-1 font-mono text-xl font-bold text-slate-900 dark:text-white">{submitted.id}</div>
@@ -219,9 +251,9 @@ const Apply: React.FC = () => {
           <div className="mt-8 flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 dark:border-slate-800 sm:flex-row sm:justify-between">
             <div className="flex gap-3">
               {step > 1 && <button type="button" onClick={() => { setStep((s) => s - 1); setError(""); }} className="inline-flex items-center rounded-md border border-slate-300 px-5 py-3 font-bold text-slate-700 dark:border-slate-700 dark:text-slate-200"><ArrowLeft className="mr-2 h-4 w-4" />Back</button>}
-              <button type="button" onClick={saveDraft} className="inline-flex items-center rounded-md border border-slate-300 px-5 py-3 font-bold text-slate-700 dark:border-slate-700 dark:text-slate-200"><Save className="mr-2 h-4 w-4" />Save draft</button>
+              <button type="button" onClick={saveDraft} disabled={submitting} className="inline-flex items-center rounded-md border border-slate-300 px-5 py-3 font-bold text-slate-700 dark:border-slate-700 dark:text-slate-200"><Save className="mr-2 h-4 w-4" />Save draft</button>
             </div>
-            <button type="submit" className="inline-flex items-center justify-center rounded-md bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800">{step === 4 ? "Submit application" : "Continue"}{step < 4 && <ArrowRight className="ml-2 h-4 w-4" />}</button>
+            <button type="submit" disabled={submitting} className="inline-flex items-center justify-center rounded-md bg-brand-700 px-6 py-3 font-bold text-white hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60">{step === 4 ? (submitting ? "Submitting..." : "Submit application") : "Continue"}{step < 4 && <ArrowRight className="ml-2 h-4 w-4" />}</button>
           </div>
           {saved && <p className="mt-3 text-right text-xs font-semibold text-green-700">Draft saved locally.</p>}
         </form>
